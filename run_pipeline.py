@@ -1,5 +1,5 @@
 from pipelines.training_pipeline import train_pipeline
-from pydantic import BaseModel, PydanticUserError
+
 
 if __name__ == "__main__":
     
@@ -7,10 +7,3 @@ if __name__ == "__main__":
 
 
 
-try:
-
-    class Model(BaseModel):
-        x: 43 = 123
-
-except PydanticUserError as exc_info:
-    assert exc_info.code == 'schema-for-unknown-type'

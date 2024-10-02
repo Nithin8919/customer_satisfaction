@@ -9,9 +9,11 @@ class Ingest_data:
     def get_data(self):
         logging.info(f'Ingesting data from{self.data_path}')
         return pd.read_csv(self.data_path)
+
+
     
 @step
-def ingest_df(data_path : str) -> None:
+def ingest_df(data_path : str) -> pd.DataFrame:
     try:
         ingest_data = Ingest_data(data_path)
         df = ingest_data.get_data()
