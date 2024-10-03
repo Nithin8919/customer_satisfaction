@@ -84,9 +84,11 @@ class DataCleaning:
     """
     Class that cleans the data and divides the data
     """
-    def __inin__(self, data: pd.DataFrame, strategy: DataStrategy):
+    def __init__(self, data: pd.DataFrame, strategy: DataStrategy):
         self.data = data
         self.strategy = strategy
+    
+    def handle_data(self) -> Union[pd.DataFrame,pd.Series]:
         
         try:
             self.strategy.handle_data(self.data)
