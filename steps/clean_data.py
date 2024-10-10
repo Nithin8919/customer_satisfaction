@@ -12,7 +12,7 @@ def clean_df(df:pd.DataFrame) -> Tuple[
     Annotated[pd.DataFrame, "X_train"],
     Annotated[pd.DataFrame, "X_test"],
     Annotated[pd.Series, "y_train"],
-    Annotated[pd.Series,"Y_test"]
+    Annotated[pd.Series,"y_test"]
 ]:
     try:
         preprocess_strategy = DataPreprocessStrategy()
@@ -23,6 +23,7 @@ def clean_df(df:pd.DataFrame) -> Tuple[
         data_cleaning = DataCleaning(process_data,divide_strategy)
         X_train,X_test,y_train,y_test = data_cleaning.handle_data()
         logging.info("Data cleaning is completed!")
+        return X_train,X_test, y_train, y_test
     except Exception as e:
         logging.info(f"There is an exception in {e}")
         raise e

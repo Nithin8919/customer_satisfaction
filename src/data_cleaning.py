@@ -8,19 +8,18 @@ import numpy as np
 class DataStrategy(ABC):
     """
     Abstract class for handling the Data.
-
     """
     @abstractmethod
     def handle_data(self, data: pd.DataFrame) -> Union[pd.DataFrame, pd.Series]:
         pass
-    
+
 class DataPreprocessStrategy(DataStrategy):
     """
-    Strategy for preprocessing the data
+    Strategy for preprocessing the data.
     """
-    def handle_data(self, data: pd.DataFrame) -> pd.DataFrame :
+    def handle_data(self, data: pd.DataFrame) -> pd.DataFrame:
         try:
-            self.df = self.df.drop(
+            data = data.drop(
                 [
                     "order_approved_at",
                     "order_delivered_carrier_date",
@@ -30,69 +29,56 @@ class DataPreprocessStrategy(DataStrategy):
                 ],
                 axis=1,
             )
-            self.df["product_weight_g"].fillna(
-                self.df["product_weight_g"].median(), inplace=True
-            )
-            self.df["product_length_cm"].fillna(
-                self.df["product_length_cm"].median(), inplace=True
-            )
-            self.df["product_height_cm"].fillna(
-                self.df["product_height_cm"].median(), inplace=True
-            )
-            self.df["product_width_cm"].fillna(
-                self.df["product_width_cm"].median(), inplace=True
-            )
-            # write "No review" in review_comment_message column
-            self.df["review_comment_message"].fillna("No review", inplace=True)
+            data["product_weight_g"].fillna(data["product_weight_g"].median(), inplace=True)
+            data["product_length_cm"].fillna(data["product_length_cm"].median(), inplace=True)
+            data["product_height_cm"].fillna(data["product_height_cm"].median(), inplace=True)
+            data["product_width_cm"].fillna(data["product_width_cm"].median(), inplace=True)
+            data["review_comment_message"].fillna("No review", inplace=True)
 
-            self.df = self.df.select_dtypes(include=[np.number])
+            # Select numeric columns
+            data = data.select_dtypes(include=[np.number])
             cols_to_drop = [
                 "customer_zip_code_prefix",
                 "order_item_id",
             ]
-            self.df = self.df.drop(cols_to_drop, axis=1)
+            data = data.drop(cols_to_drop, axis=1)
 
-            # Catchall fillna in case any where missed
-            self.df.fillna(self.df.mean(), inplace=True)
+            # Fill remaining missing values
+            data.fillna(data.mean(), inplace=True)
 
-            return self.df
+            return data
         except Exception as e:
             logging.error(e)
             raise e
-        
+
 class DataDivideStrategy(DataStrategy):
     """
-    strategy for dividing the data
+    Strategy for dividing the data.
     """
-    def divide_data(self, df: pd.DataFrame) -> Union[pd.DataFrame, pd.Series]:
+    def handle_data(self, data: pd.DataFrame) -> Union[pd.DataFrame, pd.Series]:
         """
-        It divides the data into train and test data.
+        Divides the data into train and test sets.
         """
         try:
-            X = df.drop("review_score", axis=1)
-            y = df["review_score"]
-            X_train, X_test, y_train, y_test = train_test_split(
-                X, y, test_size=0.2, random_state=42
-            )
+            X = data.drop("review_score", axis=1)
+            y = data["review_score"]
+            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
             return X_train, X_test, y_train, y_test
         except Exception as e:
             logging.error(e)
             raise e
-        
-        
+
 class DataCleaning:
     """
-    Class that cleans the data and divides the data
+    Class that cleans the data and divides it using a given strategy.
     """
     def __init__(self, data: pd.DataFrame, strategy: DataStrategy):
         self.data = data
         self.strategy = strategy
-    
-    def handle_data(self) -> Union[pd.DataFrame,pd.Series]:
-        
+
+    def handle_data(self) -> Union[pd.DataFrame, pd.Series]:
         try:
-            self.strategy.handle_data(self.data)
-            
+            return self.strategy.handle_data(self.data)
         except Exception as e:
-            logging.info(f"There is an exception {e}")
+            logging.info(f"There is an exception: {e}")
             raise e
