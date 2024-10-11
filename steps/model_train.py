@@ -1,11 +1,26 @@
 import logging
 import pandas as pd
 from zenml import step
+from zenml.client import Client
+import mlflow
 from src.model_dev import LinearRegressionModel
+from typing import Tuple
+from typing_extensions import Annotated
 from sklearn.base import RegressorMixin
 from steps.config import ModelNameConfig
+import numpy as np
 
-@step
+# Assuming experiment_tracker is a valid object from your Client() call
+from zenml.client import Client
+
+# Get the active stack
+active_stack = Client().active_stack
+
+# Access the experiment tracker
+experiment_tracker = active_stack.experiment_tracker
+
+
+@step(experiment_tracker=experiment_tracker.name)  # Corrected assignment here
 def train_model(
     X_train: pd.DataFrame,
     y_train: pd.Series,  # Changed to Series for clarity
